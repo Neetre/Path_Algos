@@ -278,11 +278,100 @@ def greedy_best_first(draw, grid, start, end, heuristic_type, speed):
     return False
 
 
+def dfs(draw, grid, start, end, speed):
+    start_time = time.time()
+    stack = [start]
+    came_from = {}
+    visited = {start}
+    explored = 0
+
+    while stack:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return False
+
+        current = stack.pop()
+        explored += 1
+
+        if current == end:
+            reconstruct_path(came_from, end, draw, start)
+            end.make_end()
+            elapsed = time.time() - start_time
+            path_length = len(reconstruct_path(came_from, end, lambda: None, start, return_path=True))
+            show_stats(elapsed, explored, path_length)
+            return True
+
+        for neighbor in current.neighbors:
+            if neighbor not in visited:
+                visited.add(neighbor)
+                came_from[neighbor] = current
+                stack.append(neighbor)
+                neighbor.make_open()
+
+        if speed > 0:
+            time.sleep(speed/1000)
+
+        draw()
+
+        if current != start:
+            current.make_closed()
+
+    show_stats(time.time()-start_time, explored, 0)
+    return False
+
+def bfs(draw, grid, start, end, speed):
+    start_time = time.time()
+    queue = [start]
+    came_from = {}
+    visited = {start}
+    explored = 0
+
+    while queue:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return False
+
+        current = queue.pop(0)
+        explored += 1
+
+        if current == end:
+            reconstruct_path(came_from, end, draw, start)
+            end.make_end()
+            elapsed = time.time() - start_time
+            path_length = len(reconstruct_path(came_from, end, lambda: None, start, return_path=True))
+            show_stats(elapsed, explored, path_length)
+            return True
+
+        for neighbor in current.neighbors:
+            if neighbor not in visited:
+                visited.add(neighbor)
+                came_from[neighbor] = current
+                queue.append(neighbor)
+                neighbor.make_open()
+
+        if speed > 0:
+            time.sleep(speed/1000)
+
+        draw()
+
+        if current != start:
+            current.make_closed()
+
+    show_stats(time.time()-start_time, explored, 0)
+    return False
+
+
 def algorithm(draw, grid, start, end, heuristic_type, speed, allow_diagonal, algorithm_type="a_star"):
     if algorithm_type == "dijkstra":
         return dijkstra(draw, grid, start, end, speed)
     elif algorithm_type == "greedy":
         return greedy_best_first(draw, grid, start, end, heuristic_type, speed)
+    elif algorithm_type == "dfs":
+        return dfs(draw, grid, start, end, speed)
+    elif algorithm_type == "bfs":
+        return bfs(draw, grid, start, end, speed)
     else:
         return a_star(draw, grid, start, end, heuristic_type, speed, allow_diagonal)
 
@@ -347,11 +436,11 @@ class CommandWindow:
     def draw_commands(self):
         command_surface = pygame.Surface((self.width, WIDTH))
         command_surface.fill(COLORS["WHITE"])
-
+        
         font_title = pygame.font.SysFont("arial", 24, bold=True)
         title = font_title.render("Commands", True, COLORS["BLACK"])
         command_surface.blit(title, (10, 20))
-
+        
         font = pygame.font.SysFont("arial", 18)
         commands = [
             ("Controls:", ""),
@@ -364,6 +453,8 @@ class CommandWindow:
             ("1", "A* Algorithm"),
             ("2", "Dijkstra's Algorithm"),
             ("3", "Greedy Best-First Search"),
+            ("4", "Depth First Search"),
+            ("5", "Breadth First Search"),
             ("", ""),
             ("Options:", ""),
             ("C", "Clear Grid"),
@@ -377,7 +468,7 @@ class CommandWindow:
         line_spacing = 25
         
         for key, description in commands:
-            if key == "": 
+            if key == "":
                 y_offset += line_spacing // 2
                 continue
                 
@@ -388,12 +479,12 @@ class CommandWindow:
             else:
                 key_surface = pygame.font.SysFont("arial", 18, bold=True).render(key, True, COLORS["BLACK"])
                 command_surface.blit(key_surface, (10, y_offset))
-
+                
                 desc_surface = font.render(description, True, COLORS["BLACK"])
                 command_surface.blit(desc_surface, (130, y_offset))
             
             y_offset += line_spacing
-
+        
         pygame.draw.line(command_surface, COLORS["GREY"], (0, 0), (0, WIDTH), 2)
         
         return command_surface
@@ -449,8 +540,8 @@ def main(win, width):
                     for row in grid:
                         for node in row:
                             node.update_neighbors(grid, allow_diagonal)
-                    algorithm(lambda: draw(win, grid, ROWS, width, command_window), grid, 
-                            start, end, heuristic_type, speed, allow_diagonal, algorithm_type)
+                    algorithm(lambda: draw(win, grid, ROWS, width, command_window),
+                            grid, start, end, heuristic_type, speed, allow_diagonal, algorithm_type)
 
                 if event.key == pygame.K_c:
                     start = end = None
@@ -485,7 +576,16 @@ def main(win, width):
                     algorithm_type = "greedy"
                     print("Algorithm: Greedy Best-First Search")
 
+                if event.key == pygame.K_4:
+                    algorithm_type = "dfs"
+                    print("Algorithm: Depth First Search")
+
+                if event.key == pygame.K_5:
+                    algorithm_type = "bfs"
+                    print("Algorithm: Breadth First Search")
+
     pygame.quit()
+
 
 def generate_random_maze(grid, rows):
     for row in grid:

@@ -59,8 +59,8 @@ Heuristics are like shortcuts.  They're rules of thumb that help an algorithm ma
 - [x] Greedy Best-First Search   -> [Greedy Best-First Search](https://en.wikipedia.org/wiki/Best-first_search)
 - [x] Dijkstra's Algorithm -> [Dijkstra's Algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
 - [x] A* Algorithm -> [A* Algorithm](https://en.wikipedia.org/wiki/A*_search_algorithm)
-- [] Depth First Search -> [Depth First Search](https://en.wikipedia.org/wiki/Depth-first_search)
-- [] Breadth First Search -> [Breadth First Search](https://en.wikipedia.org/wiki/Breadth-first_search)
+- [X] Depth First Search -> [Depth First Search](https://en.wikipedia.org/wiki/Depth-first_search)
+- [X] Breadth First Search -> [Breadth First Search](https://en.wikipedia.org/wiki/Breadth-first_search)
 
 ## Requirements
 
